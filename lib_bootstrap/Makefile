@@ -28,7 +28,7 @@ LIB	= libbootstrap.a
 OBJS	= bootstrap_board.o LzmaDecode.o string.o crc32.o LzmaWrapper.o time.o
 #OBJS	= bootstrap_board.o LzmaDecode.o string.o crc32.o LzmaWrapper.o ctype.o display_options.o string.o vsprintf.o lists.o devices.o console.o time.o
 
-#BOOTSTRAP_PRINTF_STATUS = BOOTSTRAP_PRINTF_ENABLED
+BOOTSTRAP_PRINTF_STATUS = BOOTSTRAP_PRINTF_ENABLED
 
 ifeq ($(BOOTSTRAP_PRINTF_STATUS), BOOTSTRAP_PRINTF_ENABLED)
 #overwrite objs
