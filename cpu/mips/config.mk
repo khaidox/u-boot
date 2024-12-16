@@ -35,6 +35,7 @@ ENDIANNESS = -EL
 #ENDIANNESS = -EB
 endif
 
-MIPSFLAGS += $(ENDIANNESS) -mabicalls -march=mips32r2
+KHAID_UBOOT_EXTRA_MIPSFLAGS += -G 0 -fPIC -fno-schedule-insns -fno-schedule-insns2 -mips32r2 -mtune=mips32r2
+MIPSFLAGS += $(ENDIANNESS) -mabicalls -march=mips32r2 $(KHAID_UBOOT_EXTRA_MIPSFLAGS)
 
 PLATFORM_CPPFLAGS += $(MIPSFLAGS)
