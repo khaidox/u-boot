@@ -49,7 +49,7 @@ VENDOR=
 TOPDIR	:= $(shell if [ "$$PWD" != "" ]; then echo $$PWD; else pwd; fi)
 export	TOPDIR
 
-BUILDVERSION=$(shell if test -e $(KERNELPATH)/ath_version.mk ; then cat $(KERNELPATH)/ath_version.mk | sed s/EXTRAVERSION=-LSDK-//g; fi)
+BUILDVERSION := $(shell date +%Y%m%d_%Hh%Mm%Ss)_khaid
 
 ifndef COMPRESSED_UBOOT
 COMPRESSED_UBOOT = 0
@@ -228,7 +228,7 @@ $(SUBDIRS):
 ifeq ($(COMPRESSED_UBOOT),1)
 
 #LZMA = $(BUILD_DIR)/util/lzma
-LZMA = $(TOPDIR)/../../../util/lzma/bin/lzma
+LZMA = $(TOPDIR)/../build/util/lzma/bin/lzma
 
 tuboot.bin:	System.map bootstrap.bin u-boot.lzimg	
 		@cat bootstrap.bin > $@
