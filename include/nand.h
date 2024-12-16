@@ -33,17 +33,17 @@ typedef struct mtd_info nand_info_t;
 extern int nand_curr_device;
 extern nand_info_t nand_info[];
 
-static inline int nand_read(nand_info_t *info, ulong ofs, ulong *len, u_char *buf)
+static inline int nand_read(nand_info_t *info, loff_t ofs, ulong *len, u_char *buf)
 {
 	return info->read(info, ofs, *len, (size_t *)len, buf);
 }
 
-static inline int nand_write(nand_info_t *info, ulong ofs, ulong *len, u_char *buf)
+static inline int nand_write(nand_info_t *info, loff_t ofs, ulong *len, u_char *buf)
 {
 	return info->write(info, ofs, *len, (size_t *)len, buf);
 }
 
-static inline int nand_block_isbad(nand_info_t *info, ulong ofs)
+static inline int nand_block_isbad(nand_info_t *info, loff_t ofs)
 {
 	return info->block_isbad(info, ofs);
 }

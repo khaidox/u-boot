@@ -207,7 +207,7 @@ void env_relocate (void)
 	enable_nvram();
 #endif
 
-#ifdef ENV_IS_EMBEDDED
+#if defined(ENV_IS_EMBEDDED)
 	/*
 	 * The environment buffer is embedded with the text segment,
 	 * just relocate the environment pointer

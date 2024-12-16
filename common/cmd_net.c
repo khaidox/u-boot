@@ -32,9 +32,12 @@
 
 
 extern int do_bootm (cmd_tbl_t *, int, int, char *[]);
+#ifdef FW_RECOVERY
+extern ushort fw_recovery;
+#endif
 
 static int netboot_common (proto_t, cmd_tbl_t *, int , char *[]);
-
+#ifndef COMPRESSED_UBOOT
 int do_bootp (cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 {
 	return netboot_common (BOOTP, cmdtp, argc, argv);
@@ -46,17 +49,6 @@ U_BOOT_CMD(
 	"[loadAddress] [bootfilename]\n"
 );
 
-int do_tftpb (cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
-{
-	return netboot_common (TFTP, cmdtp, argc, argv);
-}
-
-U_BOOT_CMD(
-	tftpboot,	3,	1,	do_tftpb,
-	"tftpboot- boot image via network using TFTP protocol\n",
-	"[loadAddress] [bootfilename]\n"
-);
-
 int do_rarpb (cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 {
 	return netboot_common (RARP, cmdtp, argc, argv);
@@ -65,6 +57,17 @@ int do_rarpb (cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 U_BOOT_CMD(
 	rarpboot,	3,	1,	do_rarpb,
 	"rarpboot- boot image via network using RARP/TFTP protocol\n",
+	"[loadAddress] [bootfilename]\n"
+);
+#endif /* #ifndef COMPRESSED_UBOOT */
+int do_tftpb (cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
+{
+	return netboot_common (TFTP, cmdtp, argc, argv);
+}
+
+U_BOOT_CMD(
+	tftpboot,	3,	1,	do_tftpb,
+	"tftpboot- boot image via network using TFTP protocol\n",
 	"[loadAddress] [bootfilename]\n"
 );
 
@@ -183,7 +186,7 @@ netboot_common (proto_t proto, cmd_tbl_t *cmdtp, int argc, char *argv[])
 
 		break;
 
-	default: printf ("Usage:\n%s\n", cmdtp->usage);
+	default: printf ("Usage(%d):\n%s\n", argc, cmdtp->usage);
 		return 1;
 	}
 
@@ -247,6 +250,26 @@ U_BOOT_CMD(
 	"ping\t- send ICMP ECHO_REQUEST to network host\n",
 	"pingAddress\n"
 );
+
+#ifdef TPWD_FOR_LINUX_CAL
+int pingTest(char* ip)
+{
+	NetPingIP = string_to_ip(ip);
+	if (NetPingIP == 0)
+		{		
+			printf("ping parameter ERROR. --debug by HouXB\n");
+			return -1;
+		}
+	if (NetLoop(PING) < 0)
+	{
+		printf("host %s is NOT alive. --debug by HouXB\n", ip);
+		return 1;
+	}
+	printf("host %s is alive. --debug by HouXB\n", ip);
+	return 0;
+}
+#endif
+
 #endif	/* CFG_CMD_PING */
 
 #if (CONFIG_COMMANDS & CFG_CMD_CDP)

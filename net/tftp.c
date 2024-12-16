@@ -15,9 +15,9 @@
 #if (CONFIG_COMMANDS & CFG_CMD_NET)
 
 #define WELL_KNOWN_PORT	69		/* Well known TFTP port #		*/
-#define TIMEOUT		5		/* Seconds to timeout for a lost pkt	*/
+#define TIMEOUT		2		/* Seconds to timeout for a lost pkt	*/
 #ifndef	CONFIG_NET_RETRY_COUNT
-# define TIMEOUT_COUNT	10		/* # of timeouts before giving up  */
+# define TIMEOUT_COUNT	3		/* # of timeouts before giving up  */
 #else
 # define TIMEOUT_COUNT  (CONFIG_NET_RETRY_COUNT * 2)
 #endif
@@ -267,6 +267,8 @@ TftpHandler (uchar * pkt, unsigned dest, unsigned src, unsigned len)
 
 		TftpLastBlock = TftpBlock;
 		NetSetTimeout (TIMEOUT * CFG_HZ, TftpTimeout);
+		if(TftpTimeoutCount)
+			TftpTimeoutCount = 0;
 
 		store_block (TftpBlock - 1, pkt + 2, len);
 
@@ -295,12 +297,25 @@ TftpHandler (uchar * pkt, unsigned dest, unsigned src, unsigned len)
 	}
 }
 
+extern int do_bootm (cmd_tbl_t *cmdtp, int flag, int argc, char *argv[]);
+
+#ifdef FW_RECOVERY
+extern ushort fw_recovery;
+#endif
 
 static void
 TftpTimeout (void)
 {
 	if (++TftpTimeoutCount > TIMEOUT_COUNT) {
 		puts ("\nRetry count exceeded; starting again\n");
+		
+#ifdef FW_RECOVERY
+		if(fw_recovery) {
+			load_addr = simple_strtoul("9f020000", NULL, 16);
+			do_bootm(NULL, 0, 0, NULL);
+		}
+#endif
+
 		NetStartAgain ();
 	} else {
 		puts ("T ");

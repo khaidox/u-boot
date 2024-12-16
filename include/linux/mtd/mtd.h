@@ -1,5 +1,5 @@
 /*
- * $Id: mtd.h,v 1.56 2004/08/09 18:46:04 dmarlin Exp $
+ * $Id: //depot/sw/releases/9.5.3/boot/u-boot/include/linux/mtd/mtd.h#1 $
  *
  * Copyright (C) 1999-2003 David Woodhouse <dwmw2@infradead.org> et al.
  *
@@ -60,6 +60,10 @@ struct mtd_info {
 	u_int32_t ecctype;
 	u_int32_t eccsize;
 
+	u_int32_t erasesize_shift;
+	u_int32_t erasesize_mask;
+	u_int32_t writesize_shift;
+	u_int32_t writesize_mask;
 
 	/* Kernel-only stuff starts here. */
 	char *name;

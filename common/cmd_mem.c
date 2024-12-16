@@ -312,7 +312,7 @@ int do_mem_mwc ( cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 	return 0;
 }
 #endif /* CONFIG_MX_CYCLIC */
-
+#ifndef COMPRESSED_UBOOT
 int do_mem_cmp (cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 {
 	ulong	addr1, addr2, count, ngood;
@@ -390,6 +390,8 @@ int do_mem_cmp (cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 		ngood == 1 ? "" : "s");
 	return rcode;
 }
+#endif /* #ifndef COMPRESSED_UBOOT  */
+
 
 int do_mem_cp ( cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 {
@@ -419,7 +421,7 @@ int do_mem_cp ( cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 		return 1;
 	}
 
-#ifndef CFG_NO_FLASH
+#if !defined(CFG_NO_FLASH) && !defined(CONFIG_ATH_NAND_BR)
 	/* check if we are copying to Flash */
 	if ( (addr2info(dest) != NULL)
 #ifdef CONFIG_HAS_DATAFLASH
@@ -527,6 +529,8 @@ int do_mem_cp ( cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 	return 0;
 }
 
+
+#ifndef COMPRESSED_UBOOT
 int do_mem_base (cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 {
 	if (argc > 1) {
@@ -684,6 +688,7 @@ int do_mem_loopw (cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 	}
 }
 #endif /* CONFIG_LOOPW */
+#endif /* #ifndef COMPRESSED_UBOOT */
 
 /*
  * Perform a memory test. A more complete alternative test can be
@@ -1098,6 +1103,9 @@ mod_mem(cmd_tbl_t *cmdtp, int incrflag, int flag, int argc, char *argv[])
 	return 0;
 }
 
+
+
+#ifndef COMPRESSED_UBOOT
 #ifndef CONFIG_CRC32_VERIFY
 
 int do_mem_crc (cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
@@ -1185,40 +1193,6 @@ int do_mem_crc (cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 }
 #endif	/* CONFIG_CRC32_VERIFY */
 
-/**************************************************/
-#if (CONFIG_COMMANDS & CFG_CMD_MEMORY)
-U_BOOT_CMD(
-	md,     3,     1,      do_mem_md,
-	"md      - memory display\n",
-	"[.b, .w, .l] address [# of objects]\n    - memory display\n"
-);
-
-
-U_BOOT_CMD(
-	mm,     2,      1,       do_mem_mm,
-	"mm      - memory modify (auto-incrementing)\n",
-	"[.b, .w, .l] address\n" "    - memory modify, auto increment address\n"
-);
-
-
-U_BOOT_CMD(
-	nm,     2,	    1,     	do_mem_nm,
-	"nm      - memory modify (constant address)\n",
-	"[.b, .w, .l] address\n    - memory modify, read and keep address\n"
-);
-
-U_BOOT_CMD(
-	mw,    4,    1,     do_mem_mw,
-	"mw      - memory write (fill)\n",
-	"[.b, .w, .l] address value [count]\n    - write memory\n"
-);
-
-U_BOOT_CMD(
-	cp,    4,    1,    do_mem_cp,
-	"cp      - memory copy\n",
-	"[.b, .w, .l] source target count\n    - copy memory\n"
-);
-
 U_BOOT_CMD(
 	cmp,    4,     1,     do_mem_cmp,
 	"cmp     - memory compare\n",
@@ -1267,12 +1241,6 @@ U_BOOT_CMD(
 );
 #endif /* CONFIG_LOOPW */
 
-U_BOOT_CMD(
-	mtest,    4,    1,     do_mem_mtest,
-	"mtest   - simple RAM test\n",
-	"[start [end [pattern]]]\n"
-	"    - simple RAM read/write test\n"
-);
 
 #ifdef CONFIG_MX_CYCLIC
 U_BOOT_CMD(
@@ -1288,5 +1256,45 @@ U_BOOT_CMD(
 );
 #endif /* CONFIG_MX_CYCLIC */
 
-#endif
+#endif /* #ifndef COMPRESSED_UBOOT */
+/**************************************************/
+U_BOOT_CMD(
+	md,     3,     1,      do_mem_md,
+	"md      - memory display\n",
+	"[.b, .w, .l] address [# of objects]\n    - memory display\n"
+);
+
+
+U_BOOT_CMD(
+	mm,     2,      1,       do_mem_mm,
+	"mm      - memory modify (auto-incrementing)\n",
+	"[.b, .w, .l] address\n" "    - memory modify, auto increment address\n"
+);
+
+
+U_BOOT_CMD(
+	nm,     2,	    1,     	do_mem_nm,
+	"nm      - memory modify (constant address)\n",
+	"[.b, .w, .l] address\n    - memory modify, read and keep address\n"
+);
+
+U_BOOT_CMD(
+	mw,    4,    1,     do_mem_mw,
+	"mw      - memory write (fill)\n",
+	"[.b, .w, .l] address value [count]\n    - write memory\n"
+);
+
+U_BOOT_CMD(
+	mtest,    4,    1,     do_mem_mtest,
+	"mtest   - simple RAM test\n",
+	"[start [end [pattern]]]\n"
+	"    - simple RAM read/write test\n"
+);
+
+U_BOOT_CMD(
+	cp,    4,    1,    do_mem_cp,
+	"cp      - memory copy\n",
+	"[.b, .w, .l] source target count\n    - copy memory\n"
+);
+
 #endif	/* CFG_CMD_MEMORY */

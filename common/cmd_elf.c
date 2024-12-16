@@ -215,6 +215,12 @@ int do_bootvx ( cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 			(char *) bootaddr);
 	printf ("## Starting vxWorks at 0x%08lx ...\n", addr);
 
+	/*  by huangwenzhong, 10May13 */
+	/* from zhengyongfei, for boot from vxWorks */
+	disable_interrupts();
+	mips_cache_flush();
+	mips_icache_flush_ix();
+	
 	((void (*)(void)) addr) ();
 
 	puts ("## vxWorks terminated\n");
