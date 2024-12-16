@@ -116,7 +116,8 @@ RANLIB	= $(CROSS_COMPILE)RANLIB
 
 RELFLAGS= $(PLATFORM_RELFLAGS)
 DBGFLAGS= -g #-DDEBUG
-OPTFLAGS= -Os #-fomit-frame-pointer
+#OPTFLAGS= -Os #-fomit-frame-pointer
+OPTFLAGS= -O
 ifndef LDSCRIPT
 #LDSCRIPT := $(TOPDIR)/board/$(BOARDDIR)/u-boot.lds.debug
 LDSCRIPT := $(TOPDIR)/board/$(BOARDDIR)/u-boot.lds
@@ -127,11 +128,13 @@ LDSCRIPT_BOOTSTRAP := $(TOPDIR)/board/$(BOARDDIR)/u-boot-bootstrap.lds
 
 gccincdir := $(shell $(CC) -print-file-name=include)
 
+KHAID_UBOOT_EXTRA_CPPFLAGS += -fno-reorder-functions -fno-delete-null-pointer-checks
 CPPFLAGS := $(DBGFLAGS) $(OPTFLAGS) $(RELFLAGS)		\
 	-D__KERNEL__ -DTEXT_BASE=$(TEXT_BASE)		\
 	-I$(TOPDIR)/include				\
 	-fno-builtin -ffreestanding -nostdinc -isystem	\
-	$(gccincdir) -pipe $(PLATFORM_CPPFLAGS)
+	$(gccincdir) -pipe $(PLATFORM_CPPFLAGS)		\
+	$(KHAID_UBOOT_EXTRA_CPPFLAGS)
 
 ifdef BUILD_TAG
 CFLAGS := $(CPPFLAGS) -Wall -Wstrict-prototypes \
@@ -143,7 +146,8 @@ CFLAGS += -DCOMPRESSED_UBOOT=1
 endif
 
 ifeq ($(BUILD_OPTIMIZED),y)
-CFLAGS += -Os -funit-at-a-time -mips32r2 -mtune=mips32r2
+#CFLAGS += -Os -funit-at-a-time -mips32r2 -mtune=mips32r2
+CFLAGS += -funit-at-a-time
 endif
 endif
 
@@ -213,7 +217,8 @@ ifeq ($(PCI_CLOCK),PCI_66M)
 CFLAGS := $(CFLAGS) -DPCI_66M
 endif
 
-CFLAGS += $(UBOOT_GCC_4_3_3_EXTRA_CFLAGS) -g
+# CFLAGS += $(UBOOT_GCC_4_3_3_EXTRA_CFLAGS) -g
+CFLAGS += -g
 
 #########################################################################
 
