@@ -236,18 +236,21 @@ export quiet Q V
 ifneq ($(V),1)
 	@echo [CPP] $(abspath $(CURDIR)/$<)
 endif
+	@echo "#### khaid #### uboot/config.mk .s .S Command: $(Q)$(CPP) $(AFLAGS) -o $@ $(CURDIR)/$<"
 	$(Q)$(CPP) $(AFLAGS) -o $@ $(CURDIR)/$<
 
 %.o:	%.S
 ifneq ($(V),1)
 	@echo [CC] $(abspath $(CURDIR)/$<)
 endif
+	@echo "#### khaid #### uboot/config.mk .o .S Command: $(Q)$(CC) $(AFLAGS) -c -o $@ $(CURDIR)/$<"
 	$(Q)$(CC) $(AFLAGS) -c -o $@ $(CURDIR)/$<
 
 %.o:	%.c
 ifneq ($(V),1)
 	@echo [CC] $(abspath $(CURDIR)/$<)
 endif
+	@echo "#### khaid #### uboot/config.mk .o .c Command: $(Q)$(CC) $(CFLAGS) -c -o $@ $<"
 	$(Q)$(CC) $(CFLAGS) -c -o $@ $<
 
 #########################################################################
