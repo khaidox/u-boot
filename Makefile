@@ -175,6 +175,10 @@ endif
 # Add GCC lib
 PLATFORM_LIBS += -L $(shell dirname `$(CC) $(CFLAGS) -print-libgcc-file-name`) -lgcc
 
+$(info ################################)
+$(info khaid CC : $(CC))
+$(info khaid PLATFORM_LIBS : $(PLATFORM_LIBS))
+$(info ################################)
 
 # The "tools" are needed early, so put this first
 # Don't include stuff already done in $(LIBS)
@@ -195,15 +199,22 @@ all:		$(ALL)
 endif
 
 u-boot.hex:	u-boot
+		@echo "#### khaid #### u-boot.hex"
 		$(OBJCOPY) ${OBJCFLAGS} -O ihex $< $@
 
 u-boot.srec:	u-boot
+		@echo "#### khaid #### Running objcopy to create u-boot.srec"
+		@echo "#### khaid #### Command: $(OBJCOPY) ${OBJCFLAGS} -O srec $< $@"
 		$(OBJCOPY) ${OBJCFLAGS} -O srec $< $@
 
 u-boot.bin:	u-boot
+		@echo "#### khaid #### Running objcopy to create u-boot.bin"
+		@echo "#### khaid #### Command: $(OBJCOPY) ${OBJCFLAGS} -O binary $< $@"
 		$(OBJCOPY) ${OBJCFLAGS} -O binary $< $@
 
 u-boot.img:	u-boot.bin
+		@echo "#### khaid #### Running mkimage to create u-boot.img"
+		@echo "#### khaid #### u-boot.img Command: ./tools/mkimage -A $(ARCH) -T firmware -C none -a $(TEXT_BASE) -e 0 -n $(shell sed -n -e 's/.*U_BOOT_VERSION//p' $(VERSION_FILE) | sed -e 's/\"[    ]*$$/ for $(BOARD) board\"/') -d $< $@"
 		./tools/mkimage -A $(ARCH) -T firmware -C none \
 		-a $(TEXT_BASE) -e 0 \
 		-n $(shell sed -n -e 's/.*U_BOOT_VERSION//p' $(VERSION_FILE) | \
@@ -211,18 +222,30 @@ u-boot.img:	u-boot.bin
 		-d $< $@
 
 u-boot.dis:	u-boot
+		@echo "#### khaid #### u-boot.dis"
 		$(OBJDUMP) -d $< > $@
+
 
 u-boot:		depend version $(SUBDIRS) $(OBJS) $(LIBS) $(LDSCRIPT)
 		UNDEF_SYM=`$(OBJDUMP) -x $(LIBS) |sed  -n -e 's/.*\(__u_boot_cmd_.*\)/-u\1/p'|sort|uniq`;\
 		$(LD) $(LDFLAGS) $$UNDEF_SYM $(OBJS) $(BOARD_EXTRA_OBJS) \
 			--start-group $(LIBS) --end-group $(PLATFORM_LIBS) \
 			-Map u-boot.map -o u-boot
+		@echo "#### khaid #### u-boot SUBDIRS $(SUBDIRS)"
+		@echo "#### khaid #### u-boot OBJS $(OBJS)"
+		@echo "#### khaid #### u-boot LIBS $(LIBS)"
+		@echo "#### khaid #### u-boot LDSCRIPT $(LDSCRIPT)"
+		@echo "#### khaid #### u-boot Undefined symbols: $$UNDEF_SYM"
+		@echo "#### khaid #### u-boot Command: $(LD) $(LDFLAGS) $$UNDEF_SYM $(OBJS) $(BOARD_EXTRA_OBJS) --start-group $(LIBS) --end-group $(PLATFORM_LIBS) -Map u-boot.map -o u-boot"
 
 $(LIBS):
+		@echo "#### khaid #### Running make in LIBS directory: `dirname $@`"
+		@echo "#### khaid #### Command: $(MAKE) -C `dirname $@`"
 		$(MAKE) -C `dirname $@`
 
 $(SUBDIRS):
+		@echo "#### khaid #### Running make in SUBDIRS directory: $@"
+		@echo "#### khaid #### Command: $(MAKE) -C $@ all"
 		$(MAKE) -C $@ all
 
 ifeq ($(COMPRESSED_UBOOT),1)
@@ -230,12 +253,20 @@ ifeq ($(COMPRESSED_UBOOT),1)
 #LZMA = $(BUILD_DIR)/util/lzma
 LZMA = $(TOPDIR)/../build/util/lzma/bin/lzma
 
-tuboot.bin:	System.map bootstrap.bin u-boot.lzimg	
+tuboot.bin:    System.map bootstrap.bin u-boot.lzimg
+		@echo "#### khaid #### tuboot.bin Running tuboot.bin"
+		@echo "#### khaid #### tuboot.bin Command: cat bootstrap.bin > $@"
+		@echo "#### khaid #### tuboot.bin Command: cat u-boot.lzimg >> $@"
 		@cat bootstrap.bin > $@
 		@cat u-boot.lzimg >> $@
 
 u-boot.lzimg: $(obj)u-boot.bin System.map 
+		@echo "#### khaid #### Running u-boot.lzimg"
 		@rm -rf u-boot.bin.lzma
+
+		@echo "#### khaid #### Command: $(LZMA) --best --keep $(obj)u-boot.bin"
+		@echo "#### khaid #### Command: ./tools/mkimage -A mips -T firmware -C lzma -a 0x$(shell grep "T _start" $(TOPDIR)/System.map | awk '{ printf "%s", $$1 }') -e 0x$(shell grep "T _start" $(TOPDIR)/System.map | awk '{ printf "%s", $$1 }') -n 'u-boot image' -d $(obj)u-boot.bin.lzma $@"
+
 		@$(LZMA) --best --keep $(obj)u-boot.bin
 		@./tools/mkimage -A mips -T firmware -C lzma \
 		-a 0x$(shell grep "T _start" $(TOPDIR)/System.map | awk '{ printf "%s", $$1 }') \
@@ -243,15 +274,20 @@ u-boot.lzimg: $(obj)u-boot.bin System.map
 		-n 'u-boot image' -d $(obj)u-boot.bin.lzma $@
 
 bootstrap.bin:	bootstrap
+		@echo "#### khaid #### Running bootstrap.bin $(OBJCOPY) ${OBJCFLAGS} -O binary $< $@"
 		$(OBJCOPY) ${OBJCFLAGS} -O binary $< $@
 
 bootstrap:	depend version $(SUBDIRS) $(OBJS_BOOTSTRAP) $(LIBS_BOOTSTRAP) $(LDSCRIPT_BOOTSTRAP)
-		UNDEF_SYM=`$(OBJDUMP) -x $(LIBS_BOOTSTRAP) |sed  -n -e 's/.*\(__u_boot_cmd_.*\)/-u\1/p'|sort|uniq`;\
+		UNDEF_SYM=`$(OBJDUMP) -x $(LIBS_BOOTSTRAP) |sed  -n -e 's/.*\(__u_boot_cmd_.*\)/-u\1/p'|sort|uniq`;
+		@echo "#### khaid #### bootstrap Undefined symbols: $$UNDEF_SYM"
+		@echo "#### khaid #### bootstrap $(LD) $(LDFLAGS_BOOTSTRAP) $$UNDEF_SYM $(OBJS_BOOTSTRAP) --start-group $(LIBS_BOOTSTRAP) --end-group $(PLATFORM_LIBS) -Map bootstrap.map -o bootstrap"
+
 		$(LD) $(LDFLAGS_BOOTSTRAP) $$UNDEF_SYM $(OBJS_BOOTSTRAP) \
 			--start-group $(LIBS_BOOTSTRAP) --end-group $(PLATFORM_LIBS) \
 			-Map bootstrap.map -o bootstrap
 
 $(LIBS_BOOTSTRAP):
+		@echo "#### khaid #### LIBS_BOOTSTRAP Running $(LIBS_BOOTSTRAP) $(MAKE) -C `dirname $@`"
 		$(MAKE) -C `dirname $@`
 endif
 
@@ -266,9 +302,16 @@ gdbtools:
 		$(MAKE) -C tools/gdb || exit 1
 
 depend dep:
+		@echo "#### khaid #### Running depend dep"
+		@for dir in $(SUBDIRS) ; do \
+		echo "#### khaid #### Entering directory: $$dir"; \
+		echo "#### khaid #### Command: $(MAKE) -C $$dir .depend"; \
+		done
+
 		@for dir in $(SUBDIRS) ; do $(MAKE) -C $$dir .depend ; done
 
 tags:
+		@echo "#### khaid #### tags"
 		ctags -w `find $(SUBDIRS) include \
 				lib_generic board/$(BOARDDIR) cpu/$(CPU) lib_$(ARCH) \
 				fs/cramfs fs/fat fs/fdos fs/jffs2 \
@@ -276,6 +319,7 @@ tags:
 			\( -name CVS -prune \) -o \( -name '*.[ch]' -print \)`
 
 etags:
+		@echo "#### khaid #### etags"
 		etags -a `find $(SUBDIRS) include \
 				lib_generic board/$(BOARDDIR) cpu/$(CPU) lib_$(ARCH) \
 				fs/cramfs fs/fat fs/fdos fs/jffs2 \
@@ -283,6 +327,8 @@ etags:
 			\( -name CVS -prune \) -o \( -name '*.[ch]' -print \)`
 
 System.map:	u-boot
+		@echo "#### khaid #### System.map Running nm to create System.map"
+		@echo "#### khaid #### System.map Command: $(NM) $< | grep -v '\(compiled\)\|\(\.o$$\)\|\( [aUw] \)\|\(\.\.ng$$\)\|\(LASH[RL]DI\)' | sort > System.map"
 		@$(NM) $< | \
 		grep -v '\(compiled\)\|\(\.o$$\)\|\( [aUw] \)\|\(\.\.ng$$\)\|\(LASH[RL]DI\)' | \
 		sort > System.map
@@ -3452,6 +3498,7 @@ clobber:	clean
 		-o -name '*.srec' -o -name '*.bin' -o -name u-boot.img \) \
 		-print0 \
 		| xargs -0 rm -f
+	@echo "#### khaid #### rm -f $(OBJS) *.bak tags TAGS include/version_autogenerated.h"
 	@rm -f $(OBJS) *.bak tags TAGS include/version_autogenerated.h
 	@rm -fr *.*~
 	@rm -f u-boot u-boot.map u-boot.hex $(ALL)

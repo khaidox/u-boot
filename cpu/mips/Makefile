@@ -42,6 +42,7 @@ $(LIB):	$(OBJS) $(SOBJS)
 #########################################################################
 
 .depend:	Makefile $(START:.o=.S) $(OBJS:.o=.c)
+		@echo "#### khaid #### cpu/mips Command: $(CC) -M $(CFLAGS) $(START:.o=.S) $(OBJS:.o=.c) > $@"
 		$(CC) -M $(CFLAGS) $(START:.o=.S) $(OBJS:.o=.c) > $@
 
 sinclude .depend
