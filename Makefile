@@ -431,6 +431,8 @@ $(obj)u-boot.srec:	$(obj)u-boot
 		$(OBJCOPY) -O srec $< $@
 
 $(obj)u-boot.bin:	$(obj)u-boot
+		@echo "#### khaid #### Running objcopy to create u-boot.bin"
+		@echo "#### khaid #### Command: $(OBJCOPY) ${OBJCFLAGS} -O binary $< $@"
 		$(OBJCOPY) ${OBJCFLAGS} -O binary $< $@
 		$(BOARD_SIZE_CHECK)
 
@@ -454,6 +456,12 @@ CONFIG_SYS_UBOOT_START := 0
 endif
 
 $(obj)u-boot.img:	$(obj)u-boot.bin
+		@echo "#### khaid #### Creating U-Boot image..."
+		@echo "#### khaid #### Architecture: $(ARCH)"
+		@echo "#### khaid #### Text base: $(CONFIG_SYS_TEXT_BASE)"
+		@echo "#### khaid #### U-Boot start: $(CONFIG_SYS_UBOOT_START)"
+		@echo "#### khaid #### Board: $(BOARD)"
+
 		$(obj)tools/mkimage -A $(ARCH) -T firmware -C none \
 		-O u-boot -a $(CONFIG_SYS_TEXT_BASE) \
 		-e $(CONFIG_SYS_UBOOT_START) \
