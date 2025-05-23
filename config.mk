@@ -178,7 +178,7 @@ endif
 
 AFLAGS_DEBUG := -Wa,-gstabs
 
-AFLAGS := $(AFLAGS_DEBUG) -D__ASSEMBLY__ $(CPPFLAGS)
+AFLAGS := -save-temps $(AFLAGS_DEBUG) -D__ASSEMBLY__ $(CPPFLAGS)
 
 ifeq ($(COMPRESSED_UBOOT),1)
 AFLAGS += -DCOMPRESSED_UBOOT=1
@@ -218,7 +218,7 @@ CFLAGS := $(CFLAGS) -DPCI_66M
 endif
 
 # CFLAGS += $(UBOOT_GCC_4_3_3_EXTRA_CFLAGS) -g
-CFLAGS += -g
+CFLAGS += -g -save-temps
 
 #########################################################################
 
