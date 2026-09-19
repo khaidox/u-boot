@@ -569,19 +569,27 @@ enum bootmenu_key bootmenu_loop(struct bootmenu_data *menu,
 {
 	enum bootmenu_key key;
 	int c, errchar = 0;
+	static ulong idle_count = 0;
 
 	c = cli_ch_process(cch, 0);
 	if (!c) {
+		idle_count = 0;
 		while (!c && !tstc()) {
 			schedule();
 			mdelay(10);
 			c = cli_ch_process(cch, errchar);
 			errchar = -ETIMEDOUT;
+			idle_count++;
+			if (idle_count >= 1500) { /* 15 seconds idle timeout -> Auto SELECT (ENTER) */
+				idle_count = 0;
+				return BKEY_SELECT;
+			}
 		}
 		if (!c) {
 			c = getchar();
 			c = cli_ch_process(cch, c);
 		}
+		idle_count = 0;
 	}
 
 	key = bootmenu_conv_key(c);
